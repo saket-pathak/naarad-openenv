@@ -1,9 +1,7 @@
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-![Framework](https://img.shields.io/badge/Framework-OpenEnv-green)
-![UI](https://img.shields.io/badge/UI-Streamlit-red)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-
-
+![Python](https://img.shields.io/badge/Python-3.10-blue?style=flat-square)
+![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-green?style=flat-square)
+![AI](https://img.shields.io/badge/AI-LLM%20+%20Rule--Based-orange?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Production--Ready-success?style=flat-square)
 
 # 🧠 Naarad OpenEnv  
 ### AI-Powered Complaint Prioritization Environment for Real-World Governance
