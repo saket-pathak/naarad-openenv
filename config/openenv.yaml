@@ -1,0 +1,13 @@
+name: naarad-complaint-env
+description: AI agent learns to prioritize citizen complaints based on severity
+
+actions:
+  - low
+  - medium
+  - high
+  - critical
+
+observation_space:
+  type: text
+
+reward_range: [-0.5, 1.0]
