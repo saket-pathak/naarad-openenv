@@ -1,0 +1,30 @@
+[
+  {
+    "text": "Water leakage in pipeline near my house",
+    "label": "medium"
+  },
+  {
+    "text": "Frequent power cuts in the locality",
+    "label": "high"
+  },
+  {
+    "text": "Garbage piling up for days",
+    "label": "medium"
+  },
+  {
+    "text": "Transformer making loud noise",
+    "label": "high"
+  },
+  {
+    "text": "Street dogs creating disturbance at night",
+    "label": "low"
+  },
+  {
+    "text": "Drainage overflow near main road",
+    "label": "high"
+  },
+  {
+    "text": "Street lights flickering",
+    "label": "medium"
+  }
+]

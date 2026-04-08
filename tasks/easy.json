@@ -1,0 +1,30 @@
+[
+  {
+    "text": "Fire broke out in a residential building",
+    "label": "critical"
+  },
+  {
+    "text": "Water supply completely stopped in the area",
+    "label": "high"
+  },
+  {
+    "text": "Street light not working for 2 weeks",
+    "label": "medium"
+  },
+  {
+    "text": "Garbage not collected regularly",
+    "label": "low"
+  },
+  {
+    "text": "Electric pole sparking dangerously",
+    "label": "critical"
+  },
+  {
+    "text": "Road filled with water causing traffic",
+    "label": "high"
+  },
+  {
+    "text": "Public park lights are off",
+    "label": "medium"
+  }
+]

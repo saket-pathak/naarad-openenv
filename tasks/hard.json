@@ -1,0 +1,30 @@
+[
+  {
+    "text": "Water leakage near electric transformer causing sparks and risk of fire",
+    "label": "critical"
+  },
+  {
+    "text": "Garbage accumulation leading to mosquito breeding and health risk",
+    "label": "high"
+  },
+  {
+    "text": "Street lights not working and recent theft incidents reported",
+    "label": "high"
+  },
+  {
+    "text": "Minor fire incident reported but situation is under control",
+    "label": "high"
+  },
+  {
+    "text": "Frequent water shortage along with power outages in the area",
+    "label": "high"
+  },
+  {
+    "text": "Broken road causing repeated minor accidents daily",
+    "label": "medium"
+  },
+  {
+    "text": "Electric sparks during rain near residential area",
+    "label": "critical"
+  }
+]

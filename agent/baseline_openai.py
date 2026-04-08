@@ -1,15 +1,16 @@
 import os
+from dotenv import load_dotenv
 from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
+
+# 🔥 LOAD ENV VARIABLES
+load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def get_action(text):
-    """
-    Uses OpenAI model to predict priority
-    """
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -18,7 +19,13 @@ def get_action(text):
         ]
     )
 
-    return response.choices[0].message.content.strip().lower()
+    content = response.choices[0].message.content
+
+    # 🔥 Safety check
+    if content is None:
+        return "medium"  # fallback
+
+    return content.strip().lower()
 
 
 def run(difficulty="easy"):
@@ -29,6 +36,9 @@ def run(difficulty="easy"):
     done = False
 
     while not done:
+        if obs is None:
+            break
+
         action_str = get_action(obs.text)
 
         # FIX 1: wrap in Action
@@ -39,7 +49,7 @@ def run(difficulty="easy"):
         # FIX 2: use reward.value
         total_score += reward.value
 
-    print(f"{difficulty.upper()} Score:", total_score)
+    print(f"{difficulty.upper()} Score: {total_score:.2f}")
 
 
 if __name__ == "__main__":

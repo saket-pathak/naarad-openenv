@@ -26,6 +26,9 @@ def run(difficulty="easy"):
     done = False
 
     while not done:
+        if obs is None:
+            break
+
         action_str = rule_based_predict(obs.text)
 
         action = Action(priority=action_str)
