@@ -13,55 +13,30 @@
 
 ## 🌍 Problem Statement
 
-Public grievance systems (municipal portals, helplines, etc.) handle **thousands of complaints daily**, ranging from minor civic issues to critical emergencies.
-
-However:
-- ❌ Complaints are processed manually  
-- ❌ Urgent cases are often delayed  
-- ❌ No intelligent prioritization or routing exists  
-
-👉 This leads to **inefficient governance and slow response times**
+Public grievance systems handle thousands of complaints daily but lack intelligent prioritization, causing delays in critical issue resolution.
 
 ---
 
-## 💡 Our Solution
+## 💡 Solution
 
-**Naarad OpenEnv** is a **real-world reinforcement learning environment** where AI agents learn to:
-
-- 📌 Classify complaint priority (**low → critical**)  
-- 🏢 Route complaints to appropriate departments  
-- ⚡ Optimize decisions through reward-based learning  
-
----
-
-## 🧠 Why This Matters
-
-This is **not a toy problem**.
-
-It directly applies to:
-- Government grievance systems  
-- Customer support triage  
-- Emergency prioritization workflows  
-
-👉 Enabling **AI-assisted governance systems**
+A reinforcement learning environment where agents learn to:
+- Prioritize complaints  
+- Route them effectively  
+- Optimize decisions using rewards  
 
 ---
 
-## ⚙️ OpenEnv Compliance
+## ⚙️ Environment Description
 
-This project fully implements the **OpenEnv specification**:
+This environment simulates a **complaint triage system**:
 
-### 🔹 Core Interface
-
-- `reset()` → returns initial **Observation**  
-- `step(action)` → returns `(Observation, Reward, done, info)`  
-- `state()` → returns current Observation  
+1. Agent receives a complaint  
+2. Agent selects a priority  
+3. Environment returns reward + next complaint  
 
 ---
 
-### 🔹 Typed Models (Pydantic)
+## 📥 Observation Space
 
 ```python
 Observation(text: str)
-Action(priority: str)
-Reward(value: float)
