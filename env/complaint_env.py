@@ -39,7 +39,7 @@ class ComplaintEnv:
         correct = current["label"]
 
         # 🔥 Base score from grader
-        score = grade_prediction(action.priority, correct)
+        score = grade_prediction(action.priority, correct, current["text"])
 
         # 🔥 Real-world penalty: underestimating critical issues
         if correct == "critical" and action.priority != "critical":
