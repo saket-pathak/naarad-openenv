@@ -1,5 +1,8 @@
-name: naarad-complaint-env
-description: AI agent learns to prioritize citizen complaints based on severity
+name: naarad-openenv
+description: AI environment for prioritizing citizen complaints using structured rewards and contextual grading
+version: 1.0.0
+
+entry_point: env.complaint_env:ComplaintEnv
 
 actions:
   - low
@@ -10,4 +13,4 @@ actions:
 observation_space:
   type: text
 
-reward_range: [-0.5, 1.0]
+reward_range: [0.0, 1.0]
