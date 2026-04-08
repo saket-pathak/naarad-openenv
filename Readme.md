@@ -1,4 +1,4 @@
-<!--
+
 ---
 title: Naarad OpenEnv
 emoji: 🧠
@@ -6,7 +6,7 @@ colorFrom: blue
 colorTo: green
 sdk: docker
 ---
--->
+
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?style=flat-square)
 ![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-green?style=flat-square)
