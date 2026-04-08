@@ -25,6 +25,7 @@ def grade_prediction(predicted: str, actual: str, text: str = "") -> float:
     - Distance-based scoring
     - Context-aware severity adjustment
     - Penalizes underestimation more than overestimation
+    - Prevents trivial constant strategies (judge trap defense)
     """
 
     priorities = ["low", "medium", "high", "critical"]
@@ -34,7 +35,7 @@ def grade_prediction(predicted: str, actual: str, text: str = "") -> float:
 
     distance = abs(pred_idx - actual_idx)
 
-    # 🔹 Base score (distance-based)
+    # 🔹 Base score
     if distance == 0:
         score = 1.0
     elif distance == 1:
@@ -44,17 +45,21 @@ def grade_prediction(predicted: str, actual: str, text: str = "") -> float:
     else:
         score = 0.0
 
-    # 🔥 Context-aware adjustment
+    # Context-aware adjustment
     if text:
         detected_severity = detect_severity_keywords(text)
 
-        # If model UNDERestimates severity → penalize
+        #  Penalize underestimation (very important)
         if pred_idx < detected_severity:
             score *= 0.6
 
-        # If model OVERestimates slightly → small reward
+        #  Slight reward for safe overestimation
         elif pred_idx > actual_idx:
             score *= 1.05
 
-    # 🔥 Clamp score
+    #  Judge Trap Defense: discourage constant "safe" guessing
+    if predicted == "high" and actual in ["low", "medium"]:
+        score *= 0.8
+
+    #  Clamp final score
     return max(0.0, min(score, 1.0))

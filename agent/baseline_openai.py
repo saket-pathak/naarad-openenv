@@ -4,7 +4,7 @@ from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
-# 🔥 LOAD ENV VARIABLES
+#  LOAD ENV VARIABLES
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -21,7 +21,7 @@ def get_action(text):
 
     content = response.choices[0].message.content
 
-    # 🔥 Safety check
+    #  Safety check
     if content is None:
         return "medium"  # fallback
 

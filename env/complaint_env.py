@@ -38,14 +38,14 @@ class ComplaintEnv:
         current = self.data[self.index]
         correct = current["label"]
 
-        # 🔥 Base score from grader
+        #  Base score from grader
         score = grade_prediction(action.priority, correct, current["text"])
 
-        # 🔥 Real-world penalty: underestimating critical issues
+        #  Real-world penalty: underestimating critical issues
         if correct == "critical" and action.priority != "critical":
             score *= 0.5
 
-        # 🔥 Ensure score is within bounds
+        #  Ensure score is within bounds
         score = max(0.0, min(score, 1.0))
 
         reward = Reward(value=score)

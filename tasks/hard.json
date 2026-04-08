@@ -38,5 +38,13 @@
   {
     "text": "Water leakage reported but no major disruption yet",
     "label": "medium"
+  },
+  {
+  "text": "Minor smoke observed but no fire confirmed yet",
+  "label": "medium"
+  },
+  {
+  "text": "Water leakage reported in park area, no immediate damage",
+  "label": "low"
   }
 ]
