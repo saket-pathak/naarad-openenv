@@ -1,30 +1,42 @@
 [
   {
-    "text": "Water leakage near electric transformer causing sparks and risk of fire",
+    "text": "Water leakage near hospital causing electrical hazard and risk to patients",
     "label": "critical"
   },
   {
-    "text": "Garbage accumulation leading to mosquito breeding and health risk",
+    "text": "Garbage accumulation near school attracting stray animals and foul smell",
     "label": "high"
   },
   {
-    "text": "Street lights not working and recent theft incidents reported",
+    "text": "Streetlight not working on a busy highway leading to accident risk",
     "label": "high"
   },
   {
-    "text": "Minor fire incident reported but situation is under control",
+    "text": "Electric pole sparking during rain near residential buildings",
+    "label": "critical"
+  },
+  {
+    "text": "Water supply delayed for 2 days in multiple apartments",
     "label": "high"
   },
   {
-    "text": "Frequent water shortage along with power outages in the area",
-    "label": "high"
-  },
-  {
-    "text": "Broken road causing repeated minor accidents daily",
+    "text": "Potholes on main road causing traffic congestion and minor accidents",
     "label": "medium"
   },
   {
-    "text": "Electric sparks during rain near residential area",
+    "text": "Overflowing drainage system spreading foul smell in locality",
+    "label": "high"
+  },
+  {
+    "text": "Park lights not functioning properly at night",
+    "label": "low"
+  },
+  {
+    "text": "Fire broke out in nearby building and emergency response delayed",
     "label": "critical"
+  },
+  {
+    "text": "Water leakage reported but no major disruption yet",
+    "label": "medium"
   }
 ]

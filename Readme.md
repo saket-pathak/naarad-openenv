@@ -33,6 +33,8 @@ This environment simulates a **complaint triage system**:
 1. Agent receives a complaint  
 2. Agent selects a priority  
 3. Environment returns reward + next complaint  
+4. The environment incorporates context-aware grading and penalizes underestimation of critical issues, reflecting real-world risk-sensitive decision making.
+
 
 ---
 

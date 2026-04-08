@@ -1,7 +1,4 @@
 import json
-from turtle import done
-
-from numpy import diff
 from env.models import Observation, Action, Reward
 from env.grader import grade_prediction
 
@@ -41,28 +38,19 @@ class ComplaintEnv:
         current = self.data[self.index]
         correct = current["label"]
 
-    # 🔥 Advanced reward shaping
-        levels = ["low", "medium", "high", "critical"]
+        # 🔥 Base score from grader
+        score = grade_prediction(action.priority, correct)
 
-        action_idx = levels.index(action.priority)
-        correct_idx = levels.index(correct)
+        # 🔥 Real-world penalty: underestimating critical issues
+        if correct == "critical" and action.priority != "critical":
+            score *= 0.5
 
-        diff = abs(action_idx - correct_idx)
+        # 🔥 Ensure score is within bounds
+        score = max(0.0, min(score, 1.0))
 
-        if diff == 0:
-            score = 1.0
-        elif diff == 1:
-            score = 0.5
-        else:
-            score = 0.0
+        reward = Reward(value=score)
 
-    # 🔥 Penalty for very wrong prediction
-        if diff >= 2:
-            score -= 0.2
-
-        reward = Reward(value=max(score, 0.0))
-
-    # Move to next state
+        # Move to next state
         self.index += 1
         done = self.index >= len(self.data)
 
