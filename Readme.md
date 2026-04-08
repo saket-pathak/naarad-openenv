@@ -40,3 +40,44 @@ This environment simulates a **complaint triage system**:
 
 ```python
 Observation(text: str)
+
+---
+
+## 🎯 Action Space
+
+```text
+["low", "medium", "high", "critical"]
+
+---
+
+## 🎯 Reward Function
+
+- ✅ Correct prediction → **1.0**  
+- ⚠️ Close prediction → **0.5**  
+- ❌ Incorrect prediction → **0.0**  
+- 🔻 Large mismatch → penalty applied  
+
+---
+
+## 🔁 Episode Flow
+
+- `reset()` → returns first complaint  
+- `step(action)` → returns next complaint  
+- Episode ends after all complaints are processed  
+
+---
+
+## ⚙️ Setup Instructions
+
+```bash
+git clone https://github.com/saket-pathak/naarad-openenv.git
+cd naarad-openenv
+
+python -m venv .venv
+.venv\Scripts\Activate
+
+pip install -r requirements.txt
+
+## 🐳 Docker Support
+docker build -t naarad-env .
+docker run naarad-env
