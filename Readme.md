@@ -2,20 +2,23 @@
 ![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-green?style=flat-square)
 ![AI](https://img.shields.io/badge/AI-LLM%20+%20Rule--Based-orange?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-success?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 # 🧠 Naarad OpenEnv  
 ### AI-Powered Complaint Prioritization Environment for Real-World Governance
 
+> 🚀 A real-world AI environment where agents learn to prioritize and route citizen complaints using structured rewards and multi-task evaluation.
+
 ---
 
-## 🚀 Problem Statement
+## 🌍 Problem Statement
 
-Public grievance systems in many regions (like municipal portals, helplines, etc.) handle **thousands of complaints daily**, ranging from minor civic issues to critical emergencies.
+Public grievance systems (municipal portals, helplines, etc.) handle **thousands of complaints daily**, ranging from minor civic issues to critical emergencies.
 
 However:
-- Complaints are often processed manually
-- Urgent cases may get delayed
-- No intelligent prioritization or routing exists
+- ❌ Complaints are processed manually  
+- ❌ Urgent cases are often delayed  
+- ❌ No intelligent prioritization or routing exists  
 
 👉 This leads to **inefficient governance and slow response times**
 
@@ -23,35 +26,35 @@ However:
 
 ## 💡 Our Solution
 
-**Naarad OpenEnv** is a **real-world AI training environment** where agents learn to:
+**Naarad OpenEnv** is a **real-world reinforcement learning environment** where AI agents learn to:
 
-- 📌 Prioritize citizen complaints (low → critical)
-- 🏢 Route them to correct departments
-- ⚡ Optimize decision-making using reward-based learning
+- 📌 Classify complaint priority (**low → critical**)  
+- 🏢 Route complaints to appropriate departments  
+- ⚡ Optimize decisions through reward-based learning  
 
 ---
 
 ## 🧠 Why This Matters
 
-This is NOT a toy problem.
+This is **not a toy problem**.
 
-It directly simulates:
-- Customer support triage  
+It directly applies to:
 - Government grievance systems  
-- Emergency response prioritization  
+- Customer support triage  
+- Emergency prioritization workflows  
 
-👉 A step toward **AI-assisted governance systems**
+👉 Enabling **AI-assisted governance systems**
 
 ---
 
-## ⚙️ OpenEnv Environment Design
+## ⚙️ OpenEnv Compliance
 
-We fully implement the **OpenEnv specification**:
+This project fully implements the **OpenEnv specification**:
 
 ### 🔹 Core Interface
 
-- `reset()` → returns initial Observation  
-- `step(action)` → returns `(observation, reward, done, info)`  
+- `reset()` → returns initial **Observation**  
+- `step(action)` → returns `(Observation, Reward, done, info)`  
 - `state()` → returns current Observation  
 
 ---
