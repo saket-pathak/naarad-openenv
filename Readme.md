@@ -40,7 +40,30 @@ This environment simulates a **complaint triage system**:
 
 ```python
 Observation(text: str)
+```
 
 ---
+
+## 🎯 Action Space
+
+```text
+["low", "medium", "high", "critical"]
+```
+
+---
+
+## 🎯 Reward Function
+
+- Correct → 1.0  
+- Close → 0.5  
+- Incorrect → 0.0  
+
+---
+
+## 🔁 Episode Flow
+
+- `reset()` → first complaint  
+- `step(action)` → next complaint  
+- Episode ends after all complaints  
 
 
