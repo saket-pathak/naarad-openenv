@@ -1,4 +1,3 @@
-
 ---
 title: Naarad OpenEnv
 emoji: 🧠
@@ -7,47 +6,42 @@ colorTo: green
 sdk: docker
 ---
 
-
-![Python](https://img.shields.io/badge/Python-3.10-blue?style=flat-square)
-![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-green?style=flat-square)
-![AI](https://img.shields.io/badge/AI-LLM%20+%20Rule--Based-orange?style=flat-square)
-![Status](https://img.shields.io/badge/Status-Production--Ready-success?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
-
 # 🧠 Naarad OpenEnv
 
-### AI-Powered Complaint Prioritization Environment for Real-World Governance
+### AI-Powered Complaint Prioritization System (OpenEnv Compatible)
 
-> 🚀 A real-world AI environment where agents learn to prioritize and route citizen complaints using structured rewards and multi-task evaluation.
+> 🚀 A real-world AI environment where agents learn to intelligently prioritize and route citizen complaints using structured rewards and contextual reasoning.
 
 ---
 
 ## 🌍 Problem Statement
 
-Public grievance systems handle thousands of complaints daily but lack intelligent prioritization, causing delays in critical issue resolution.
+Public grievance systems handle thousands of complaints daily but lack intelligent prioritization, leading to:
+
+- Delayed response to critical issues 🚨
+- Inefficient resource allocation ⚙️
+- Poor citizen satisfaction 😞
 
 ---
 
 ## 💡 Solution
 
-A reinforcement learning environment where agents learn to:
+Naarad OpenEnv provides a **reinforcement learning environment** where AI agents learn to:
 
-- 📌 Prioritize complaints
-- 🏢 Route them effectively
+- 📌 Prioritize complaints based on severity
+- 🏢 Route issues to appropriate departments
 - ⚡ Optimize decisions using reward-based feedback
 
 ---
 
-## ⚙️ Environment Description
+## ⚙️ How It Works
 
-This environment simulates a **complaint triage system**:
-
-1. Agent receives a complaint
+1. Agent receives a complaint (text input)
 2. Agent selects a priority level
-3. Environment evaluates the action
-4. Returns reward + next complaint
-
-💡 The environment incorporates **context-aware grading** and penalizes **underestimation of critical issues**, reflecting real-world risk-sensitive decision-making.
+3. Environment evaluates the decision
+4. Returns:
+   - reward 🎯
+   - next complaint 🔁
 
 ---
 
@@ -57,48 +51,76 @@ This environment simulates a **complaint triage system**:
 Observation(text: str)
 ```
 
----
-
 ## 🎯 Action Space
 
-```
+```python
 ["low", "medium", "high", "critical"]
 ```
 
 ---
 
-## 🏆 Reward Function
+## 🏆 Reward System
 
-```
-✅ Exact match              →  1.0
-⚠️ Close prediction         →  0.7
-❌ Moderate error            →  0.3
-🚫 Severe mismatch          →  0.0
-🔻 Underestimating critical  →  additional penalty
-```
+| Scenario | Reward |
+|---|---|
+| ✅ Exact match | 1.0 |
+| ⚠️ Close prediction | 0.7 |
+| ❌ Moderate error | 0.3 |
+| 🚫 Severe mismatch | 0.0 |
+| 🔻 Underestimating critical | Extra penalty |
 
 ---
 
 ## 🔁 Episode Flow
 
 ```
-reset()       → returns first complaint
-step(action)  → returns next complaint + reward
+POST /reset  → returns first complaint
+POST /step   → returns next complaint + reward
 ```
 
-The episode ends after all complaints are processed.
+Episode ends after all complaints are processed.
+
+---
+
+## 🚀 API Endpoints
+
+### 🔹 Reset Environment
+
+```
+POST /reset
+```
+
+### 🔹 Take Action
+
+```
+POST /step
+Content-Type: application/json
+
+{
+  "priority": "high"
+}
+```
+
+---
+
+## 🧪 Try It Live
+
+👉 **API Docs (Swagger UI):** https://saketpathak-naarad-openenv-final.hf.space/docs  
+👉 **Base URL:** https://saketpathak-naarad-openenv-final.hf.space
 
 ---
 
 ## 📂 Project Structure
 
 ```
-env/        # Environment logic
-agent/      # Rule-based & baseline agents
-tasks/      # Dataset (easy, medium, hard)
-app/        # Streamlit UI
-config/     # OpenEnv config
-scripts/    # Execution scripts
+env/              # Environment logic
+agent/            # Rule-based & baseline agents
+tasks/            # Dataset (easy, medium, hard)
+main.py           # FastAPI backend (API endpoints)
+openenv.yaml      # OpenEnv configuration
+inference.py      # Evaluation script
+Dockerfile        # Deployment setup
+requirements.txt
 ```
 
 ---
@@ -108,8 +130,10 @@ scripts/    # Execution scripts
 ```bash
 git clone https://github.com/saket-pathak/naarad-openenv.git
 cd naarad-openenv
+
 python -m venv .venv
 .venv\Scripts\activate
+
 pip install -r requirements.txt
 ```
 
@@ -118,12 +142,12 @@ pip install -r requirements.txt
 ## ▶️ Run Locally
 
 ```bash
-streamlit run app/app.py
+uvicorn main:app --reload
 ```
 
 ---
 
-## 🐳 Docker Support
+## 🐳 Docker Deployment
 
 ```bash
 docker build -t naarad-env .
@@ -132,6 +156,30 @@ docker run -p 7860:7860 naarad-env
 
 ---
 
+## 🤖 Inference (Evaluation)
+
+```bash
+python inference.py
+```
+
+---
+
+## 🎯 Key Highlights
+
+- ✅ OpenEnv compliant
+- 🤖 Supports AI agents (rule-based + ML-ready)
+- ⚡ Real-world inspired reward system
+- 🌐 Fully deployed via FastAPI + Docker
+- 🧪 Ready for automated evaluation
+
+---
+
 ## 📜 License
 
 MIT License
+
+---
+
+## 🔗 References
+
+OpenEnv Docs: https://huggingface.co/docs/hub/spaces-config-reference
