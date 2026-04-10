@@ -1,0 +1,30 @@
+version = 1
+revision = 3
+requires-python = ">=3.10"
+
+[[package]]
+name = "naarad-openenv"
+version = "1.0.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "openai" },
+    { name = "openenv" },
+    { name = "openenv-core" },
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "streamlit" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi" },
+    { name = "openai" },
+    { name = "openenv", specifier = ">=0.2.0" },
+    { name = "openenv-core", specifier = ">=0.2.0" },
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "streamlit" },
+    { name = "uvicorn" },
+]
