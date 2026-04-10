@@ -1,0 +1,22 @@
+[project]
+name = "naarad-openenv"
+version = "1.0.0"
+description = "AI environment for prioritizing citizen complaints using structured rewards and contextual grading"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi",
+  "openai",
+  "openenv-core>=0.2.0",
+  "pydantic",
+  "requests",
+  "streamlit",
+  "uvicorn",
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
