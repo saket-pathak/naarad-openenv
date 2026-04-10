@@ -37,7 +37,7 @@ def run(difficulty="easy"):
 
         total_score += reward.value
 
-    print(f"[Rule-Based] {difficulty.upper()} Score:", total_score)
+    return total_score
 
 
 if __name__ == "__main__":
