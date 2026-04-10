@@ -9,8 +9,6 @@ python_version: "3.10"
 app_file: main.py
 pinned: false
 ---
->>>>>>> 639ca9a312f5b14f98fa310da40faec23fa0375a:README.md
-
 
 # 🧠 Naarad OpenEnv
 
