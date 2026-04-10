@@ -1,11 +1,12 @@
 ---
 title: Naarad OpenEnv
-emoji: 🧠
+emooji: 🧠
 colorFrom: blue
 colorTo: green
 sdk: docker
 pinned: false
 ---
+
 
 # 🧠 Naarad OpenEnv
 
