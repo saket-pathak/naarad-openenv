@@ -3,14 +3,16 @@ name = "naarad-openenv"
 version = "0.1.0"
 description = "AI-powered grievance assistant"
 authors = [
-    { name="Saket", email="your-email@example.com" }
+    { name = "Saket Pathak" }
 ]
 dependencies = [
     "fastapi",
     "uvicorn",
-    "pydantic"
+    "pydantic",
+    "openai",
+    "requests"
 ]
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
