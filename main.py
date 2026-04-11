@@ -5,14 +5,22 @@ from env.models import Action
 import os
 from openai import OpenAI
 
-# ✅ STRICT: Always use injected env vars (NO fallback)
-client = OpenAI(
-    base_url=os.environ["API_BASE_URL"],
-    api_key=os.environ["API_KEY"]
-)
+# ✅ Try to get injected variables
+API_BASE_URL = os.getenv("API_BASE_URL")
+API_KEY = os.getenv("API_KEY")
+
+# ✅ Initialize client properly
+if API_BASE_URL and API_KEY:
+    # 🔥 Hackathon mode (REQUIRED for validation)
+    client = OpenAI(
+        base_url=API_BASE_URL,
+        api_key=API_KEY,
+    )
+else:
+    # ✅ HF fallback (prevents crash)
+    client = OpenAI()  # uses default OpenAI config if available
 
 app = FastAPI()
-
 env = ComplaintEnv("easy")
 
 
@@ -35,7 +43,7 @@ def step(action: dict):
     try:
         priority = str(action["priority"])
 
-        # ✅ ALWAYS make LLM call (no conditions)
+        # ✅ ALWAYS attempt LLM call
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -53,7 +61,6 @@ def step(action: dict):
         llm_output = response.choices[0].message.content
 
         act = Action(priority=priority)
-
         obs, reward, done, info = env.step(act)
 
         return {
