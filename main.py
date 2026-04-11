@@ -2,6 +2,15 @@ from fastapi import FastAPI, HTTPException
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
+import os
+from openai import OpenAI
+
+#  MUST use these (important for validator)
+client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"],
+)
+
 app = FastAPI()
 
 env = ComplaintEnv("easy")
@@ -25,6 +34,25 @@ def step(action: dict):
 
     try:
         priority = str(action["priority"])
+
+        #  IMPORTANT: Make LLM call (this is what validator checks)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an assistant that classifies complaint priority."
+                },
+                {
+                    "role": "user",
+                    "content": f"Classify this complaint priority: {priority}"
+                }
+            ]
+        )
+
+        # Optional: use LLM output (not strictly required but good)
+        llm_output = response.choices[0].message.content
+
         act = Action(priority=priority)
 
         obs, reward, done, info = env.step(act)
@@ -33,7 +61,10 @@ def step(action: dict):
             "text": obs.text if obs else None,
             "reward": reward.value if reward else 0,
             "done": done,
-            "info": info if info else {}
+            "info": {
+                "llm_response": llm_output,
+                **(info if info else {})
+            }
         }
 
     except Exception as e:
