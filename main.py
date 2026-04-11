@@ -5,18 +5,11 @@ from env.models import Action
 import os
 from openai import OpenAI
 
-# ✅ Safe handling for both environments
-API_BASE_URL = os.getenv("API_BASE_URL")
-API_KEY = os.getenv("API_KEY")
-
-client = None
-
-# ✅ Only initialize when env vars exist (important)
-if API_BASE_URL and API_KEY:
-    client = OpenAI(
-        base_url=API_BASE_URL,
-        api_key=API_KEY,
-    )
+# ✅ STRICT: Always use injected env vars (NO fallback)
+client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"]
+)
 
 app = FastAPI()
 
@@ -42,24 +35,22 @@ def step(action: dict):
     try:
         priority = str(action["priority"])
 
-        # 🔥 LLM call ONLY if client exists
-        llm_output = "LLM not available"
+        # ✅ ALWAYS make LLM call (no conditions)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an assistant that classifies complaint priority."
+                },
+                {
+                    "role": "user",
+                    "content": f"Classify this complaint priority: {priority}"
+                }
+            ]
+        )
 
-        if client:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an assistant that classifies complaint priority."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Classify this complaint priority: {priority}"
-                    }
-                ]
-            )
-            llm_output = response.choices[0].message.content
+        llm_output = response.choices[0].message.content
 
         act = Action(priority=priority)
 
