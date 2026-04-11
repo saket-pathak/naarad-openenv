@@ -1,10 +1,8 @@
-from main import app
-import uvicorn
+from fastapi import FastAPI
+from openenv.core import HTTPEnvServer
+from env.models import Action, Observation
+from server.environment import ComplaintEnvironment
 
-
-def main():
-    uvicorn.run("server.app:app", host="0.0.0.0", port=7860)
-
-
-if __name__ == "__main__":
-    main()
+app = FastAPI()
+server = HTTPEnvServer(ComplaintEnvironment, Action, Observation)
+server.register_routes(app)
