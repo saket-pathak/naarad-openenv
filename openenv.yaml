@@ -2,7 +2,7 @@ name: naarad-openenv
 description: AI environment for prioritizing citizen complaints using structured rewards and contextual grading
 version: 1.0.0
 
-entry_point: scripts.run_baseline:run_entry
+entry_point: env.complaint_env:ComplaintEnv
 
 actions:
   - low
