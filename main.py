@@ -5,19 +5,28 @@ from env.models import Action
 import os
 from openai import OpenAI
 
-#  STRICT PROXY USAGE (validator requirement)
-try:
+# Robust client setup (handles ALL environments)
+client = None
+USING_PROXY = False
+
+if "API_BASE_URL" in os.environ and "API_KEY" in os.environ:
+    # Hackathon validator mode (STRICT)
     client = OpenAI(
         base_url=os.environ["API_BASE_URL"],
         api_key=os.environ["API_KEY"]
     )
     USING_PROXY = True
-except KeyError:
-    #  HF fallback only
+
+elif "OPENAI_API_KEY" in os.environ:
+    #  HF Space with your own key (optional)
     client = OpenAI(
-        api_key=os.getenv("OPENAI_API_KEY")
+        api_key=os.environ["OPENAI_API_KEY"]
     )
-    USING_PROXY = False
+
+else:
+    #  No key → still run app without crashing
+    client = None
+
 
 app = FastAPI()
 env = ComplaintEnv("easy")
@@ -45,22 +54,18 @@ def step(action: dict):
     try:
         priority = str(action["priority"])
 
-        #  FORCE LLM CALL (no condition)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Classify complaint priority."
-                },
-                {
-                    "role": "user",
-                    "content": f"{priority}"
-                }
-            ]
-        )
-
-        llm_output = response.choices[0].message.content
+        #  Safe LLM call
+        if client:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "Classify complaint priority."},
+                    {"role": "user", "content": f"{priority}"}
+                ]
+            )
+            llm_output = response.choices[0].message.content
+        else:
+            llm_output = "LLM not available"
 
         act = Action(priority=priority)
         obs, reward, done, info = env.step(act)
