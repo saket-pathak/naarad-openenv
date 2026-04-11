@@ -5,39 +5,16 @@ from env.models import Action
 import os
 from openai import OpenAI
 
-# Robust client setup (handles ALL environments)
-client = None
-USING_PROXY = False
-
-if "API_BASE_URL" in os.environ and "API_KEY" in os.environ:
-    # Hackathon validator mode (STRICT)
-    client = OpenAI(
-        base_url=os.environ["API_BASE_URL"],
-        api_key=os.environ["API_KEY"]
-    )
-    USING_PROXY = True
-
-elif "OPENAI_API_KEY" in os.environ:
-    #  HF Space with your own key (optional)
-    client = OpenAI(
-        api_key=os.environ["OPENAI_API_KEY"]
-    )
-
-else:
-    #  No key → still run app without crashing
-    client = None
-
-
 app = FastAPI()
 env = ComplaintEnv("easy")
+
+# ✅ DO NOT decide client at startup
+# We decide INSIDE the request (important)
 
 
 @app.get("/")
 def home():
-    return {
-        "message": "API is running successfully",
-        "using_proxy": USING_PROXY
-    }
+    return {"message": "API is running successfully"}
 
 
 @app.post("/reset")
@@ -54,18 +31,31 @@ def step(action: dict):
     try:
         priority = str(action["priority"])
 
-        #  Safe LLM call
-        if client:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Classify complaint priority."},
-                    {"role": "user", "content": f"{priority}"}
-                ]
+        # 🔥 ALWAYS try proxy FIRST (validator requirement)
+        try:
+            client = OpenAI(
+                base_url=os.environ["API_BASE_URL"],
+                api_key=os.environ["API_KEY"]
             )
-            llm_output = response.choices[0].message.content
-        else:
-            llm_output = "LLM not available"
+            USING_PROXY = True
+
+        except KeyError:
+            # ✅ HF fallback
+            client = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY")
+            )
+            USING_PROXY = False
+
+        # 🔥 ALWAYS MAKE LLM CALL (no skipping)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Classify complaint priority."},
+                {"role": "user", "content": f"{priority}"}
+            ]
+        )
+
+        llm_output = response.choices[0].message.content
 
         act = Action(priority=priority)
         obs, reward, done, info = env.step(act)
