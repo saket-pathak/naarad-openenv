@@ -1,25 +1,29 @@
 from fastapi import FastAPI, HTTPException
 from env.complaint_env import ComplaintEnv
 from env.models import Action
-
 import os
 from openai import OpenAI
 
 app = FastAPI()
-
-# Initialize client once at startup using injected env vars
-client = OpenAI(
-    base_url=os.environ["API_BASE_URL"],
-    api_key=os.environ["API_KEY"]
-)
+env = ComplaintEnv("easy")
 
 MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 
-env = ComplaintEnv("easy")
+
+def get_client():
+    """Create LLM client only when env vars are available."""
+    api_base = os.environ.get("API_BASE_URL")
+    api_key = os.environ.get("API_KEY")
+    if api_base and api_key:
+        return OpenAI(base_url=api_base, api_key=api_key)
+    return None
 
 
 def classify_complaint(text: str) -> str:
-    """Use LLM to classify complaint priority."""
+    client = get_client()
+    if not client:
+        return "medium"  # HF Space fallback (no validator)
+
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
@@ -58,18 +62,11 @@ def reset():
 
 @app.post("/step")
 def step(body: dict):
-    """
-    Expects: {"text": "complaint text here"}
-    The agent calls LLM to decide priority, then steps the env.
-    """
     text = body.get("text", "")
-
     if not text:
         raise HTTPException(status_code=400, detail="Missing 'text' in request body")
 
-    # LLM decides the action
     priority = classify_complaint(text)
-
     action = Action(priority=priority)
     obs, reward, done, info = env.step(action)
 
