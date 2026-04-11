@@ -3,37 +3,31 @@ from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
-# 🔥 Initialize client ONCE using proxy
-try:
-    client = OpenAI(
-        base_url=os.environ["API_BASE_URL"],
-        api_key=os.environ["API_KEY"]
-    )
-except KeyError:
-    client = None
+# Initialize client using proxy env vars (no silent fallback)
+client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"]
+)
+
+MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")  # use env var if provided
 
 
 def get_action(text):
-    global client
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": "Classify the complaint into exactly one of these priorities: low, medium, high, critical. Reply with only the single word."
+            },
+            {"role": "user", "content": text}
+        ],
+        max_tokens=10,
+        temperature=0
+    )
 
-    try:
-        if client:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Classify the complaint into one of: low, medium, high, critical."},
-                    {"role": "user", "content": text}
-                ]
-            )
-
-            content = response.choices[0].message.content
-            prediction = content.strip().lower() if content else "medium"
-
-        else:
-            prediction = "medium"
-
-    except Exception:
-        prediction = "medium"
+    content = response.choices[0].message.content
+    prediction = content.strip().lower() if content else "medium"
 
     if prediction not in ["low", "medium", "high", "critical"]:
         prediction = "medium"
