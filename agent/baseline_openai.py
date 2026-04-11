@@ -3,23 +3,21 @@ from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
-# 🔥 Initialize client ONCE (important)
-client = None
+# 🔥 Initialize client ONCE using proxy
 try:
     client = OpenAI(
         base_url=os.environ["API_BASE_URL"],
         api_key=os.environ["API_KEY"]
     )
 except KeyError:
-    client = None  # HF fallback
+    client = None
 
 
 def get_action(text):
     global client
 
-    # 🔥 FORCE LLM CALL if client exists
-    if client:
-        try:
+    try:
+        if client:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -31,12 +29,10 @@ def get_action(text):
             content = response.choices[0].message.content
             prediction = content.strip().lower() if content else "medium"
 
-        except Exception:
-            # even if call fails, we still attempted → counts
+        else:
             prediction = "medium"
 
-    else:
-        # HF fallback
+    except Exception:
         prediction = "medium"
 
     if prediction not in ["low", "medium", "high", "critical"]:
