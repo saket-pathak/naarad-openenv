@@ -1,19 +1,24 @@
 import os
-import requests
 from typing import List, Optional
+from openai import OpenAI
+from env.complaint_env import ComplaintEnv
+from env.models import Action
 
-#  CONFIG (important)
-API_BASE_URL = os.getenv("API_BASE_URL", "https://saketpathak-naarad-openenv.hf.space")
-MODEL_NAME = os.getenv("MODEL_NAME", "simple-agent")
-
+# CONFIG
 TASK_NAME = "complaint-priority"
 BENCHMARK = "naarad-env"
-
-MAX_STEPS = 8
 SUCCESS_SCORE_THRESHOLD = 0.5
 
+# LLM client using validator-injected proxy credentials
+client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"]
+)
 
-# LOG FUNCTIONS (STRICT FORMAT)
+MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")
+
+
+# LOG FUNCTIONS (keep exact same format)
 def log_start(task: str, env: str, model: str) -> None:
     print(f"[START] task={task} env={env} model={model}", flush=True)
 
@@ -29,79 +34,86 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
 
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+    print(
+        f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}",
+        flush=True,
+    )
 
 
-# SIMPLE AGENT (rule-based for now)
-def choose_priority(text: str) -> str:
-    text = text.lower()
+def classify_complaint(text: str) -> str:
+    """Call LLM through proxy to classify complaint priority."""
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Classify the complaint into exactly one of these priorities: "
+                    "low, medium, high, critical. Reply with only the single word."
+                )
+            },
+            {"role": "user", "content": text}
+        ],
+        max_tokens=10,
+        temperature=0
+    )
+    content = response.choices[0].message.content
+    prediction = content.strip().lower() if content else "medium"
+    if prediction not in ["low", "medium", "high", "critical"]:
+        prediction = "medium"
+    return prediction
 
-    if "fire" in text or "emergency" in text:
-        return "critical"
-    elif "water" in text or "electricity" in text:
-        return "high"
-    elif "road" in text:
-        return "medium"
-    else:
-        return "low"
 
-
-#  MAIN LOGIC
-def main():
+def run_episode(difficulty: str) -> List[float]:
+    """Run one full episode for a given difficulty level."""
+    env = ComplaintEnv(difficulty)
+    obs = env.reset()
     rewards = []
+    step = 0
+    done = False
+
+    while not done and obs is not None:
+        step += 1
+        try:
+            action_str = classify_complaint(obs.text)
+            action = Action(priority=action_str)
+            obs, reward, done, info = env.step(action)
+
+            reward_val = reward.value if reward else 0.0
+            rewards.append(reward_val)
+            log_step(step, action_str, reward_val, done, None)
+
+        except Exception as e:
+            log_step(step, "error", 0.0, True, str(e))
+            break
+
+    return rewards
+
+
+def main():
+    all_rewards = []
     steps_taken = 0
     success = False
     score = 0.0
 
-    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
+    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL)
 
     try:
-        # 🔁 RESET
-        requests.post(f"{API_BASE_URL}/reset")
+        for difficulty in ["easy", "medium", "hard"]:
+            rewards = run_episode(difficulty)
+            all_rewards.extend(rewards)
+            steps_taken += len(rewards)
 
-        last_text = ""
-
-        for step in range(1, MAX_STEPS + 1):
-            try:
-                # 🤖 choose action
-                action = choose_priority(last_text)
-
-                # ▶️ STEP CALL
-                response = requests.post(
-                    f"{API_BASE_URL}/step",
-                    json={"priority": action}
-                )
-
-                data = response.json()
-
-                # 📊 extract values
-                text = data.get("text", "")
-                reward = float(data.get("reward", 0))
-                done = bool(data.get("done", False))
-                error = data.get("error", None)
-
-                rewards.append(reward)
-                steps_taken = step
-
-                log_step(step, action, reward, done, error)
-
-                last_text = text
-
-                if done:
-                    break
-
-            except Exception as e:
-                log_step(step, action="error", reward=0.0, done=True, error=str(e))
-                break
-
-        #  SCORE CALCULATION
-        if rewards:
-            score = sum(rewards) / len(rewards)
-
+        score = sum(all_rewards) / len(all_rewards) if all_rewards else 0.0
         success = score >= SUCCESS_SCORE_THRESHOLD
 
     finally:
-        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+        log_end(
+            success=success,
+            steps=steps_taken,
+            score=score,
+            rewards=all_rewards
+        )
 
 
 if __name__ == "__main__":
