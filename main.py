@@ -23,28 +23,31 @@ def reset():
 @app.post("/step")
 def step(action: dict):
     try:
-        # 🔥 Try to use validator proxy
+        # 🔥 Try proxy (validator)
         try:
             client = OpenAI(
                 base_url=os.environ["API_BASE_URL"],
                 api_key=os.environ["API_KEY"]
             )
 
+            # 🔥 ALWAYS call LLM FIRST
+            priority_input = str(action.get("priority", "general complaint"))
+
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "Classify complaint priority."},
-                    {"role": "user", "content": str(action.get("priority", "general complaint"))}
+                    {"role": "user", "content": priority_input}
                 ]
             )
 
             llm_output = response.choices[0].message.content
 
         except KeyError:
-            # ✅ HF fallback (NO API CALL, but no crash)
+            # ✅ HF fallback (no crash)
             llm_output = "LLM not available in HF environment"
 
-        # ✅ Continue logic
+        # ✅ NOW validate (AFTER LLM call)
         if "priority" not in action:
             raise HTTPException(status_code=400, detail="Missing 'priority'")
 
