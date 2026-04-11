@@ -9,15 +9,14 @@ from openai import OpenAI
 API_BASE_URL = os.getenv("API_BASE_URL")
 API_KEY = os.getenv("API_KEY")
 
+client = None
+
+# ✅ Only initialize when env vars exist (important)
 if API_BASE_URL and API_KEY:
-    # ✅ Hackathon / validator mode
     client = OpenAI(
         base_url=API_BASE_URL,
         api_key=API_KEY,
     )
-else:
-    # ✅ Local / HF fallback (no crash)
-    client = OpenAI()
 
 app = FastAPI()
 
@@ -43,23 +42,24 @@ def step(action: dict):
     try:
         priority = str(action["priority"])
 
-        #  IMPORTANT: Make LLM call (this is what validator checks)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an assistant that classifies complaint priority."
-                },
-                {
-                    "role": "user",
-                    "content": f"Classify this complaint priority: {priority}"
-                }
-            ]
-        )
+        # 🔥 LLM call ONLY if client exists
+        llm_output = "LLM not available"
 
-        # Optional: use LLM output (not strictly required but good)
-        llm_output = response.choices[0].message.content
+        if client:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that classifies complaint priority."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Classify this complaint priority: {priority}"
+                    }
+                ]
+            )
+            llm_output = response.choices[0].message.content
 
         act = Action(priority=priority)
 
