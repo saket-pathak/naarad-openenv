@@ -4,6 +4,25 @@ version: 1.0.0
 
 entry_point: server.environment:ComplaintEnvironment
 
+tasks:
+  - id: easy
+    name: Easy Complaint Classification
+    description: Classify simple complaints into priority levels
+    data: tasks/easy.json
+    grader: env.grader.grade_prediction
+
+  - id: medium
+    name: Medium Complaint Classification
+    description: Classify moderately complex complaints
+    data: tasks/medium.json
+    grader: env.grader.grade_prediction
+
+  - id: hard
+    name: Hard Complaint Classification
+    description: Classify complex multi-factor complaints
+    data: tasks/hard.json
+    grader: env.grader.grade_prediction
+
 observation:
   type: object
   fields:
