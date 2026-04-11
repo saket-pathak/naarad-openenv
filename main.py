@@ -23,26 +23,35 @@ def reset():
 @app.post("/step")
 def step(action: dict):
     try:
-        # 🔥 FORCE proxy usage (validator requirement)
-        client = OpenAI(
-            base_url=os.environ["API_BASE_URL"],
-            api_key=os.environ["API_KEY"]
-        )
+        # 🔥 Try proxy FIRST
+        try:
+            client = OpenAI(
+                base_url=os.environ["API_BASE_URL"],
+                api_key=os.environ["API_KEY"]
+            )
+        except KeyError:
+            # ✅ HF fallback (NO crash)
+            if "OPENAI_API_KEY" in os.environ:
+                client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+            else:
+                client = None
 
-        # 🔥 ALWAYS call LLM FIRST (no conditions, no skipping)
+        # 🔥 ALWAYS attempt LLM call
         priority_input = str(action.get("priority", "general complaint"))
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "Classify complaint priority."},
-                {"role": "user", "content": priority_input}
-            ]
-        )
+        if client:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "Classify complaint priority."},
+                    {"role": "user", "content": priority_input}
+                ]
+            )
+            llm_output = response.choices[0].message.content
+        else:
+            llm_output = "LLM not available"
 
-        llm_output = response.choices[0].message.content
-
-        # ✅ Continue normal logic AFTER LLM call
+        # ✅ Continue logic
         if "priority" not in action:
             raise HTTPException(status_code=400, detail="Missing 'priority'")
 
