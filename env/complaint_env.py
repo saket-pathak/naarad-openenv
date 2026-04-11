@@ -19,26 +19,22 @@ class ComplaintEnv:
         self.index = 0
         self.actions = ["low", "medium", "high", "critical"]
 
-        # 🔥 Initialize client ONCE (important)
+        # 🔥 Initialize client ONCE
         try:
             self.client = OpenAI(
                 base_url=os.environ["API_BASE_URL"],
                 api_key=os.environ["API_KEY"]
             )
-        except KeyError:
+            print("✅ OpenAI client initialized (proxy mode)")
+        except KeyError as e:
+            print("⚠️ Missing env variable:", e)
             self.client = None  # HF fallback
 
     def reset(self) -> Observation:
-        """
-        Reset environment to initial state.
-        """
         self.index = 0
         return Observation(text=self.data[self.index]["text"])
 
     def state(self) -> Observation:
-        """
-        Return current observation.
-        """
         return Observation(text=self.data[self.index]["text"])
 
     def step(self, action: Action):
@@ -47,37 +43,50 @@ class ComplaintEnv:
         (next_observation, reward, done, info)
         """
 
-        # 🔥 FORCE LLM PROXY CALL (CRITICAL FOR VALIDATOR)
+        print("🔁 STEP CALLED")
+
+        current = self.data[self.index]
+
+        # 🔥 FORCE LLM PROXY CALL (CRITICAL)
         if self.client:
             try:
-                _ = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",  # ✅ stable + proxy-supported
+                print("🔍 LLM CALL STARTED")
+
+                response = self.client.chat.completions.create(
+                    model="gpt-4o",  # 🔥 important change
                     messages=[
-                        {"role": "user", "content": "Test complaint classification"}
-                    ]
+                        {
+                            "role": "system",
+                            "content": "You are a complaint classification system."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Classify priority of this complaint: {current['text']}"
+                        }
+                    ],
+                    max_tokens=10
                 )
-            except Exception:
-                # Even failed call still counts as attempt
-                pass
+
+                print("✅ LLM CALL SUCCESS")
+
+            except Exception as e:
+                print("❌ LLM CALL FAILED:", e)
+        else:
+            print("⚠️ CLIENT NOT INITIALIZED")
 
         # ---------------- EXISTING LOGIC ---------------- #
 
-        current = self.data[self.index]
         correct = current["label"]
 
-        # Base score from grader
         score = grade_prediction(action.priority, correct, current["text"])
 
-        # Real-world penalty: underestimating critical issues
         if correct == "critical" and action.priority != "critical":
             score *= 0.5
 
-        # Ensure score is within bounds
         score = max(0.0, min(score, 1.0))
 
         reward = Reward(value=score)
 
-        # Move to next state
         self.index += 1
         done = self.index >= len(self.data)
 
@@ -88,7 +97,4 @@ class ComplaintEnv:
         return next_obs, reward, done, {"correct": correct}
 
     def get_action_space(self):
-        """
-        Returns available actions.
-        """
         return self.actions
