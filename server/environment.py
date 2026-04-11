@@ -1,4 +1,5 @@
-from openenv.core import Environment
+from openenv.core.env_server.interfaces import Environment
+from openenv.core.env_server.types import State
 from env.models import Observation, Action
 from env.grader import grade_prediction
 import json
@@ -13,13 +14,15 @@ class ComplaintEnvironment(Environment):
                 self.all_data.extend(json.load(f))
         self.index = 0
         self.current = self.all_data[0]
+        self._step_count = 0
 
-    def reset(self, seed=None, episode_id=None, **kwargs) -> Observation:  # ✅ fixed
+    def reset(self, seed=None, episode_id=None, **kwargs) -> Observation:
         self.index = 0
+        self._step_count = 0
         self.current = self.all_data[self.index]
         return Observation(text=self.current["text"])
 
-    def step(self, action: Action, timeout_s=None, **kwargs) -> Observation:  # ✅ fixed
+    def step(self, action: Action, timeout_s=None, **kwargs) -> Observation:
         correct = self.current["label"]
         score = grade_prediction(action.priority, correct, self.current["text"])
 
@@ -27,7 +30,7 @@ class ComplaintEnvironment(Environment):
             score *= 0.5
 
         score = max(0.01, min(score, 0.99))
-
+        self._step_count += 1
         self.index += 1
         done = self.index >= len(self.all_data)
 
@@ -38,9 +41,8 @@ class ComplaintEnvironment(Environment):
             return Observation(text="", done=True, reward=score)
 
     @property
-    def state(self):
-        return {
-            "index": self.index,
-            "total": len(self.all_data),
-            "current_text": self.current["text"] if self.current else ""
-        }
+    def state(self) -> State:
+        return State(
+            episode_id=None,
+            step_count=self._step_count
+        )
