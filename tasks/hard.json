@@ -1,50 +1,74 @@
 [
   {
     "text": "Water leakage near hospital causing electrical hazard and risk to patients",
-    "label": "critical"
+    "label": "critical",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Garbage accumulation near school attracting stray animals and foul smell",
-    "label": "high"
+    "label": "high",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Streetlight not working on a busy highway leading to accident risk",
-    "label": "high"
+    "label": "high",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Electric pole sparking during rain near residential buildings",
-    "label": "critical"
+    "label": "critical",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Water supply delayed for 2 days in multiple apartments",
-    "label": "high"
+    "label": "high",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Potholes on main road causing traffic congestion and minor accidents",
-    "label": "medium"
+    "label": "medium",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Overflowing drainage system spreading foul smell in locality",
-    "label": "high"
+    "label": "high",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Park lights not functioning properly at night",
-    "label": "low"
+    "label": "low",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Fire broke out in nearby building and emergency response delayed",
-    "label": "critical"
+    "label": "critical",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Water leakage reported but no major disruption yet",
-    "label": "medium"
+    "label": "medium",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
-  "text": "Minor smoke observed but no fire confirmed yet",
-  "label": "medium"
+    "text": "Minor smoke observed but no fire confirmed yet",
+    "label": "medium",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
-  "text": "Water leakage reported in park area, no immediate damage",
-  "label": "low"
+    "text": "Water leakage reported in park area, no immediate damage",
+    "label": "low",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   }
 ]

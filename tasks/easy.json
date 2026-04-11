@@ -1,30 +1,44 @@
 [
   {
     "text": "Fire broke out in a residential building",
-    "label": "critical"
+    "label": "critical",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Water supply completely stopped in the area",
-    "label": "high"
+    "label": "high",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Street light not working for 2 weeks",
-    "label": "medium"
+    "label": "medium",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Garbage not collected regularly",
-    "label": "low"
+    "label": "low",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Electric pole sparking dangerously",
-    "label": "critical"
+    "label": "critical",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Road filled with water causing traffic",
-    "label": "high"
+    "label": "high",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   },
   {
     "text": "Public park lights are off",
-    "label": "medium"
+    "label": "medium",
+    "grader": "env.grader.grade_prediction",
+    "reward_range": [0.01, 0.99]
   }
 ]
