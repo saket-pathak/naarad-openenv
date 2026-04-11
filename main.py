@@ -5,11 +5,19 @@ from env.models import Action
 import os
 from openai import OpenAI
 
-#  MUST use these (important for validator)
-client = OpenAI(
-    base_url=os.environ["API_BASE_URL"],
-    api_key=os.environ["API_KEY"],
-)
+# ✅ Safe handling for both environments
+API_BASE_URL = os.getenv("API_BASE_URL")
+API_KEY = os.getenv("API_KEY")
+
+if API_BASE_URL and API_KEY:
+    # ✅ Hackathon / validator mode
+    client = OpenAI(
+        base_url=API_BASE_URL,
+        api_key=API_KEY,
+    )
+else:
+    # ✅ Local / HF fallback (no crash)
+    client = OpenAI()
 
 app = FastAPI()
 
