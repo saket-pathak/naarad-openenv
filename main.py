@@ -5,20 +5,19 @@ from env.models import Action
 import os
 from openai import OpenAI
 
-# ✅ Try to get injected variables
-API_BASE_URL = os.getenv("API_BASE_URL")
-API_KEY = os.getenv("API_KEY")
-
-# ✅ Initialize client properly
-if API_BASE_URL and API_KEY:
-    # 🔥 Hackathon mode (REQUIRED for validation)
+#  STRICT PROXY USAGE (validator requirement)
+try:
     client = OpenAI(
-        base_url=API_BASE_URL,
-        api_key=API_KEY,
+        base_url=os.environ["API_BASE_URL"],
+        api_key=os.environ["API_KEY"]
     )
-else:
-    # ✅ HF fallback (prevents crash)
-    client = OpenAI()  # uses default OpenAI config if available
+    USING_PROXY = True
+except KeyError:
+    #  HF fallback only
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+    USING_PROXY = False
 
 app = FastAPI()
 env = ComplaintEnv("easy")
@@ -26,7 +25,10 @@ env = ComplaintEnv("easy")
 
 @app.get("/")
 def home():
-    return {"message": "API is running successfully"}
+    return {
+        "message": "API is running successfully",
+        "using_proxy": USING_PROXY
+    }
 
 
 @app.post("/reset")
@@ -43,17 +45,17 @@ def step(action: dict):
     try:
         priority = str(action["priority"])
 
-        # ✅ ALWAYS attempt LLM call
+        #  FORCE LLM CALL (no condition)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an assistant that classifies complaint priority."
+                    "content": "Classify complaint priority."
                 },
                 {
                     "role": "user",
-                    "content": f"Classify this complaint priority: {priority}"
+                    "content": f"{priority}"
                 }
             ]
         )
@@ -69,6 +71,7 @@ def step(action: dict):
             "done": done,
             "info": {
                 "llm_response": llm_output,
+                "using_proxy": USING_PROXY,
                 **(info if info else {})
             }
         }
