@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 from openai import OpenAI
-from env.complaint_env import ComplaintEnv
+from server.environment import ComplaintEnvironment
 from env.models import Action
 
 # CONFIG
@@ -10,15 +10,17 @@ BENCHMARK = "naarad-env"
 SUCCESS_SCORE_THRESHOLD = 0.5
 
 # LLM client using validator-injected proxy credentials
+api_base = os.environ.get("API_BASE_URL") or ""
+api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("API_KEY") or ""
+
 client = OpenAI(
-    base_url=os.environ["API_BASE_URL"],
-    api_key=os.environ["API_KEY"]
+    base_url=api_base if api_base else None,
+    api_key=api_key if api_key else "placeholder"
 )
 
 MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 
 
-# LOG FUNCTIONS (keep exact same format)
 def log_start(task: str, env: str, model: str) -> None:
     print(f"[START] task={task} env={env} model={model}", flush=True)
 
@@ -41,7 +43,6 @@ def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> No
 
 
 def classify_complaint(text: str) -> str:
-    """Call LLM through proxy to classify complaint priority."""
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
@@ -64,9 +65,8 @@ def classify_complaint(text: str) -> str:
     return prediction
 
 
-def run_episode(difficulty: str) -> List[float]:
-    """Run one full episode for a given difficulty level."""
-    env = ComplaintEnv(difficulty)
+def run_episode() -> List[float]:
+    env = ComplaintEnvironment()
     obs = env.reset()
     rewards = []
     step = 0
@@ -79,7 +79,7 @@ def run_episode(difficulty: str) -> List[float]:
             action = Action(priority=action_str)
             obs, reward, done, info = env.step(action)
 
-            reward_val = reward.value if reward else 0.0
+            reward_val = float(reward) if reward else 0.0
             rewards.append(reward_val)
             log_step(step, action_str, reward_val, done, None)
 
@@ -99,10 +99,9 @@ def main():
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL)
 
     try:
-        for difficulty in ["easy", "medium", "hard"]:
-            rewards = run_episode(difficulty)
-            all_rewards.extend(rewards)
-            steps_taken += len(rewards)
+        rewards = run_episode()
+        all_rewards.extend(rewards)
+        steps_taken = len(rewards)
 
         score = sum(all_rewards) / len(all_rewards) if all_rewards else 0.0
         success = score >= SUCCESS_SCORE_THRESHOLD
