@@ -1,31 +1,48 @@
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
-#  LOAD ENV VARIABLES
-load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def get_client():
+    """
+    Create OpenAI client using LiteLLM proxy (validator)
+    or fallback for local/HF
+    """
+    try:
+        return OpenAI(
+            base_url=os.environ["API_BASE_URL"],
+            api_key=os.environ["API_KEY"]
+        )
+    except KeyError:
+        # fallback (HF/local) → no crash
+        return None
 
 
 def get_action(text):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Classify the complaint into one of: low, medium, high, critical."},
-            {"role": "user", "content": text}
-        ]
-    )
+    client = get_client()
 
-    content = response.choices[0].message.content
+    # ✅ If proxy available → make real call
+    if client:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Classify the complaint into one of: low, medium, high, critical."},
+                {"role": "user", "content": text}
+            ]
+        )
 
-    #  Safety check
-    if content is None:
-        return "medium"  # fallback
+        content = response.choices[0].message.content
+        prediction = content.strip().lower() if content else "medium"
 
-    return content.strip().lower()
+    else:
+        # ✅ HF fallback (no API)
+        prediction = "medium"
+
+    if prediction not in ["low", "medium", "high", "critical"]:
+        prediction = "medium"
+
+    return prediction
 
 
 def run(difficulty="easy"):
@@ -40,13 +57,9 @@ def run(difficulty="easy"):
             break
 
         action_str = get_action(obs.text)
-
-        # FIX 1: wrap in Action
         action = Action(priority=action_str)
 
         obs, reward, done, info = env.step(action)
-
-        # FIX 2: use reward.value
         total_score += reward.value
 
     print(f"{difficulty.upper()} Score: {total_score:.2f}")
