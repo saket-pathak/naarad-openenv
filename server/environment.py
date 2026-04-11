@@ -25,7 +25,7 @@ class ComplaintEnvironment(Environment):
         self.current = self.all_data[self.index]
         return Observation(text=self.current["text"])
 
-    def step(self, action: Action, timeout_s=None, **kwargs):
+    def step(self, action: Action, timeout_s=None, **kwargs) -> Observation:
         correct = self.current["label"]
         score = grade_prediction(action.priority, correct, self.current["text"])
 
@@ -39,12 +39,9 @@ class ComplaintEnvironment(Environment):
 
         if not done:
             self.current = self.all_data[self.index]
-            obs = Observation(text=self.current["text"], done=done, reward=score)
+            return Observation(text=self.current["text"], done=done, reward=score)
         else:
-            obs = Observation(text="", done=True, reward=score)
-
-        # Return Gymnasium-style 4-tuple
-        return obs, score, done, {"correct": correct}
+            return Observation(text="", done=True, reward=score)
 
     @property
     def state(self) -> State:

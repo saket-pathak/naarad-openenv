@@ -7,10 +7,10 @@ from env.grader import grade_prediction
 class ComplaintEnv:
     def __init__(self, difficulty="easy"):
         self.difficulty = difficulty
-
-        with open(f"tasks/{difficulty}.json", "r") as f:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(base_dir, "tasks", f"{difficulty}.json")
+        with open(path, "r") as f:
             self.data = json.load(f)
-
         self.index = 0
         self.actions = ["low", "medium", "high", "critical"]
 
@@ -27,13 +27,10 @@ class ComplaintEnv:
 
         score = grade_prediction(action.priority, correct, current["text"])
 
-        # Critical penalty — but never let it touch 0.0
         if correct == "critical" and action.priority != "critical":
             score *= 0.5
 
-        # Strict boundary — never 0.0 or 1.0
-        score = max(0.01, min(score, 0.99))  # ✅
-
+        score = max(0.01, min(score, 0.99))
         reward = Reward(value=score)
 
         self.index += 1
