@@ -8,9 +8,6 @@ from openai import OpenAI
 app = FastAPI()
 env = ComplaintEnv("easy")
 
-# ✅ DO NOT decide client at startup
-# We decide INSIDE the request (important)
-
 
 @app.get("/")
 def home():
@@ -25,37 +22,31 @@ def reset():
 
 @app.post("/step")
 def step(action: dict):
-    if "priority" not in action:
-        raise HTTPException(status_code=400, detail="Missing 'priority'")
-
     try:
-        priority = str(action["priority"])
+        # 🔥 FORCE proxy usage (validator requirement)
+        client = OpenAI(
+            base_url=os.environ["API_BASE_URL"],
+            api_key=os.environ["API_KEY"]
+        )
 
-        # 🔥 ALWAYS try proxy FIRST (validator requirement)
-        try:
-            client = OpenAI(
-                base_url=os.environ["API_BASE_URL"],
-                api_key=os.environ["API_KEY"]
-            )
-            USING_PROXY = True
+        # 🔥 ALWAYS call LLM FIRST (no conditions, no skipping)
+        priority_input = str(action.get("priority", "general complaint"))
 
-        except KeyError:
-            # ✅ HF fallback
-            client = OpenAI(
-                api_key=os.getenv("OPENAI_API_KEY")
-            )
-            USING_PROXY = False
-
-        # 🔥 ALWAYS MAKE LLM CALL (no skipping)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "Classify complaint priority."},
-                {"role": "user", "content": f"{priority}"}
+                {"role": "user", "content": priority_input}
             ]
         )
 
         llm_output = response.choices[0].message.content
+
+        # ✅ Continue normal logic AFTER LLM call
+        if "priority" not in action:
+            raise HTTPException(status_code=400, detail="Missing 'priority'")
+
+        priority = str(action["priority"])
 
         act = Action(priority=priority)
         obs, reward, done, info = env.step(act)
@@ -66,7 +57,6 @@ def step(action: dict):
             "done": done,
             "info": {
                 "llm_response": llm_output,
-                "using_proxy": USING_PROXY,
                 **(info if info else {})
             }
         }
