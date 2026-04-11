@@ -6,7 +6,40 @@ import os
 from openai import OpenAI
 
 app = FastAPI()
+
+# Initialize client once at startup using injected env vars
+client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"]
+)
+
+MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")
+
 env = ComplaintEnv("easy")
+
+
+def classify_complaint(text: str) -> str:
+    """Use LLM to classify complaint priority."""
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Classify the complaint into exactly one of these priorities: "
+                    "low, medium, high, critical. Reply with only the single word."
+                )
+            },
+            {"role": "user", "content": text}
+        ],
+        max_tokens=10,
+        temperature=0
+    )
+    content = response.choices[0].message.content
+    prediction = content.strip().lower() if content else "medium"
+    if prediction not in ["low", "medium", "high", "critical"]:
+        prediction = "medium"
+    return prediction
 
 
 @app.get("/")
@@ -16,55 +49,34 @@ def home():
 
 @app.post("/reset")
 def reset():
-    env.reset()
-    return {"status": "reset successful"}
+    obs = env.reset()
+    return {
+        "status": "reset successful",
+        "text": obs.text if obs else None
+    }
 
 
 @app.post("/step")
-def step(action: dict):
-    try:
-        # 🔥 Try proxy (validator)
-        try:
-            client = OpenAI(
-                base_url=os.environ["API_BASE_URL"],
-                api_key=os.environ["API_KEY"]
-            )
+def step(body: dict):
+    """
+    Expects: {"text": "complaint text here"}
+    The agent calls LLM to decide priority, then steps the env.
+    """
+    text = body.get("text", "")
 
-            # 🔥 ALWAYS call LLM FIRST
-            priority_input = str(action.get("priority", "general complaint"))
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing 'text' in request body")
 
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Classify complaint priority."},
-                    {"role": "user", "content": priority_input}
-                ]
-            )
+    # LLM decides the action
+    priority = classify_complaint(text)
 
-            llm_output = response.choices[0].message.content
+    action = Action(priority=priority)
+    obs, reward, done, info = env.step(action)
 
-        except KeyError:
-            # ✅ HF fallback (no crash)
-            llm_output = "LLM not available in HF environment"
-
-        # ✅ NOW validate (AFTER LLM call)
-        if "priority" not in action:
-            raise HTTPException(status_code=400, detail="Missing 'priority'")
-
-        priority = str(action["priority"])
-
-        act = Action(priority=priority)
-        obs, reward, done, info = env.step(act)
-
-        return {
-            "text": obs.text if obs else None,
-            "reward": reward.value if reward else 0,
-            "done": done,
-            "info": {
-                "llm_response": llm_output,
-                **(info if info else {})
-            }
-        }
-
-    except Exception as e:
-        return {"error": str(e)}
+    return {
+        "text": obs.text if obs else None,
+        "reward": reward.value if reward else 0,
+        "done": done,
+        "llm_priority": priority,
+        "info": info if info else {}
+    }
