@@ -1,10 +1,5 @@
 def detect_severity_keywords(text: str) -> int:
-    """
-    Detect severity level from keywords.
-    Returns index based on severity.
-    """
     text = text.lower()
-
     critical_keywords = ["fire", "explosion", "hazard", "accident", "sparking", "emergency"]
     high_keywords = ["water", "electricity", "leakage", "drainage", "garbage"]
     medium_keywords = ["delay", "not working", "issue", "problem"]
@@ -20,14 +15,6 @@ def detect_severity_keywords(text: str) -> int:
 
 
 def grade_prediction(predicted: str, actual: str, text: str = "") -> float:
-    """
-    Advanced grading system:
-    - Distance-based scoring
-    - Context-aware severity adjustment
-    - Penalizes underestimation more than overestimation
-    - Prevents trivial constant strategies (judge trap defense)
-    """
-
     priorities = ["low", "medium", "high", "critical"]
 
     pred_idx = priorities.index(predicted)
@@ -35,31 +22,27 @@ def grade_prediction(predicted: str, actual: str, text: str = "") -> float:
 
     distance = abs(pred_idx - actual_idx)
 
-    # 🔹 Base score
+    # Base score — strictly between 0 and 1
     if distance == 0:
-        score = 1.0
+        score = 0.95   # ✅ was 1.0
     elif distance == 1:
-        score = 0.7
+        score = 0.65
     elif distance == 2:
-        score = 0.3
+        score = 0.25
     else:
-        score = 0.0
+        score = 0.05   # ✅ was 0.0
 
     # Context-aware adjustment
     if text:
         detected_severity = detect_severity_keywords(text)
-
-        #  Penalize underestimation (very important)
         if pred_idx < detected_severity:
             score *= 0.6
-
-        #  Slight reward for safe overestimation
         elif pred_idx > actual_idx:
             score *= 1.05
 
-    #  Judge Trap Defense: discourage constant "safe" guessing
+    # Judge Trap Defense
     if predicted == "high" and actual in ["low", "medium"]:
         score *= 0.8
 
-    #  Clamp final score
-    return max(0.0, min(score, 1.0))
+    # Clamp — strictly between 0 and 1, never touching the boundaries
+    return max(0.01, min(score, 0.99))  # ✅ hard boundaries
