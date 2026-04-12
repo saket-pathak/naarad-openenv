@@ -4,7 +4,12 @@ from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
-# Required environment variables with defaults where specified
+# CONFIG
+TASK_NAME = "complaint-priority"
+BENCHMARK = "naarad-env"
+SUCCESS_SCORE_THRESHOLD = 0.5
+
+# Required environment variables
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.getenv("HF_TOKEN")
@@ -17,10 +22,6 @@ client = OpenAI(
     base_url=API_BASE_URL,
     api_key=HF_TOKEN
 )
-
-TASK_NAME = "complaint-priority"
-BENCHMARK = "naarad-env"
-SUCCESS_SCORE_THRESHOLD = 0.5
 
 
 def log_start(task: str, env: str, model: str) -> None:
@@ -36,10 +37,10 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     )
 
 
-def log_end(success: bool, steps: int, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
     print(
-        f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}",
+        f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}",
         flush=True,
     )
 
@@ -94,6 +95,7 @@ def main():
     all_rewards = []
     steps_taken = 0
     success = False
+    score = 0.0
 
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
@@ -110,6 +112,7 @@ def main():
         log_end(
             success=success,
             steps=steps_taken,
+            score=score,
             rewards=all_rewards
         )
 
