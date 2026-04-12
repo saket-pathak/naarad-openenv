@@ -8,15 +8,15 @@ entry_point: env.complaint_env:ComplaintEnv
 
 tasks:
   - id: easy
-    file: tasks/easy.json
+    path: tasks/easy.json
     grader: env.grader:grade_prediction
 
   - id: medium
-    file: tasks/medium.json
+    path: tasks/medium.json
     grader: env.grader:grade_prediction
 
   - id: hard
-    file: tasks/hard.json
+    path: tasks/hard.json
     grader: env.grader:grade_prediction
 
 actions:
