@@ -1,38 +1,75 @@
 name: naarad-openenv
-description: AI environment for prioritizing citizen complaints using structured rewards and contextual grading
-version: 1.0.0
 
-entry_point: server.environment:ComplaintEnvironment
+version: "1.0.0"
+
+description: >
+  Real-world complaint priority classification environment for AI agent training.
+  An agent receives citizen complaints and must classify them into priority levels:
+  low, medium, high, or critical.
+
+author: "Saket Pathak"
+
+tags:
+  - openenv
+  - complaint-classification
+  - real-world
+  - triage
 
 tasks:
   - id: easy
-    name: Easy Complaint Classification
-    description: Classify simple complaints into priority levels
-    data: tasks/easy.json
-    grader: env.grader.grade_prediction
+    description: "Classify simple, straightforward citizen complaints into priority levels"
+    difficulty: easy
+    max_attempts: 7
+    scoring: "0.0–1.0 partial credit based on priority distance"
 
   - id: medium
-    name: Medium Complaint Classification
-    description: Classify moderately complex complaints
-    data: tasks/medium.json
-    grader: env.grader.grade_prediction
+    description: "Classify moderately complex complaints with multiple factors"
+    difficulty: medium
+    max_attempts: 7
+    scoring: "0.0–1.0 partial credit based on priority distance"
 
   - id: hard
-    name: Hard Complaint Classification
-    description: Classify complex multi-factor complaints
-    data: tasks/hard.json
-    grader: env.grader.grade_prediction
+    description: "Classify complex multi-factor complaints requiring contextual understanding"
+    difficulty: hard
+    max_attempts: 12
+    scoring: "0.0–1.0 partial credit based on priority distance"
 
-observation:
-  type: object
-  fields:
-    text: string
+observation_space:
+  text: "string — the complaint text to classify"
+  severity_hint: "string (optional) — contextual severity hint"
 
-action:
-  type: object
-  fields:
-    priority:
-      type: string
-      enum: [low, medium, high, critical]
+action_space:
+  priority: "string (required) — one of: low, medium, high, critical"
 
-reward_range: [0.01, 0.99]
+reward:
+  type: continuous
+  range: [0.01, 0.99]
+  shaping:
+    - "+0.95 exact priority match"
+    - "+0.65 off by one priority level"
+    - "+0.25 off by two priority levels"
+    - "+0.05 off by three priority levels"
+    - "×0.5 penalty for missing critical complaints"
+
+endpoints:
+  - path: /reset
+    method: POST
+    description: Start a new episode
+  - path: /step
+    method: POST
+    description: Submit a priority classification
+  - path: /state
+    method: GET
+    description: Get current episode metadata
+  - path: /tasks
+    method: GET
+    description: List all tasks
+  - path: /health
+    method: GET
+    description: Health check
+
+runtime:
+  framework: FastAPI + OpenEnv
+  python: "3.10"
+  docker: true
+  hf_spaces: true
