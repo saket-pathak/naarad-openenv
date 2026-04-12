@@ -17,7 +17,11 @@ MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 
 def get_client():
     api_base = os.environ.get("API_BASE_URL")
-    api_key = os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
+    api_key = (
+        os.environ.get("HF_TOKEN") or
+        os.environ.get("OPENAI_API_KEY") or
+        os.environ.get("API_KEY")
+    )
     if api_base and api_key:
         return OpenAI(base_url=api_base, api_key=api_key)
     return None
