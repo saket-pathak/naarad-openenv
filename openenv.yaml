@@ -1,27 +1,21 @@
 spec_version: 1.0
 
 name: naarad-openenv
-description: AI environment for prioritizing citizen complaints using structured rewards and contextual grading
+description: AI environment for prioritizing citizen complaints
 version: 1.0.0
 
 entry_point: env.complaint_env:ComplaintEnv
 
 tasks:
   - id: easy
-    name: Easy Complaint Classification
-    description: Classify simple complaints into priority levels
     file: tasks/easy.json
     grader: env.grader:grade_prediction
 
   - id: medium
-    name: Medium Complaint Classification
-    description: Classify moderately complex complaints
     file: tasks/medium.json
     grader: env.grader:grade_prediction
 
   - id: hard
-    name: Hard Complaint Classification
-    description: Classify complex multi-factor complaints
     file: tasks/hard.json
     grader: env.grader:grade_prediction
 
