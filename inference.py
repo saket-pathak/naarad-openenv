@@ -4,24 +4,23 @@ from openai import OpenAI
 from env.complaint_env import ComplaintEnv
 from env.models import Action
 
+# Required environment variables with defaults where specified
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+if HF_TOKEN is None:
+    raise ValueError("HF_TOKEN environment variable is required")
+
+# Initialize OpenAI client
+client = OpenAI(
+    base_url=API_BASE_URL,
+    api_key=HF_TOKEN
+)
+
 TASK_NAME = "complaint-priority"
 BENCHMARK = "naarad-env"
 SUCCESS_SCORE_THRESHOLD = 0.5
-
-api_base = os.environ.get("API_BASE_URL") or ""
-api_key = (
-    os.environ.get("HF_TOKEN") or
-    os.environ.get("OPENAI_API_KEY") or
-    os.environ.get("API_KEY") or
-    "placeholder"
-)
-
-client = OpenAI(
-    base_url=api_base if api_base else None,
-    api_key=api_key
-)
-
-MODEL = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 
 
 def log_start(task: str, env: str, model: str) -> None:
@@ -31,17 +30,23 @@ def log_start(task: str, env: str, model: str) -> None:
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
     error_val = error if error else "null"
     done_val = str(done).lower()
-    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
+    print(
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}",
+        flush=True,
+    )
 
 
-def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+    print(
+        f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}",
+        flush=True,
+    )
 
 
 def classify_complaint(text: str) -> str:
     response = client.chat.completions.create(
-        model=MODEL,
+        model=MODEL_NAME,
         messages=[
             {
                 "role": "system",
@@ -89,9 +94,8 @@ def main():
     all_rewards = []
     steps_taken = 0
     success = False
-    score = 0.0
 
-    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL)
+    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
         for difficulty in ["easy", "medium", "hard"]:
@@ -103,7 +107,11 @@ def main():
         success = score >= SUCCESS_SCORE_THRESHOLD
 
     finally:
-        log_end(success=success, steps=steps_taken, score=score, rewards=all_rewards)
+        log_end(
+            success=success,
+            steps=steps_taken,
+            rewards=all_rewards
+        )
 
 
 if __name__ == "__main__":
