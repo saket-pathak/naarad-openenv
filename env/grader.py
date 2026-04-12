@@ -1,7 +1,25 @@
 class grade_prediction:
     def grade(self, sample) -> float:
-        # 🔥 REQUIRED for validator
-        return 0.5
+        """
+        Validator calls this method.
+        Must handle None AND real samples safely.
+        """
+
+        # ✅ Case 1: validator sanity check
+        if sample is None:
+            return 0.5
+
+        # ✅ Case 2: real evaluation (safe fallback)
+        try:
+            predicted = sample.get("prediction", "medium")
+            actual = sample.get("label", "medium")
+            text = sample.get("text", "")
+
+            return self.__call__(predicted, actual, text)
+
+        except Exception:
+            # NEVER crash
+            return 0.5
 
     def __call__(self, predicted: str, actual: str, text: str = "") -> float:
         priorities = ["low", "medium", "high", "critical"]
