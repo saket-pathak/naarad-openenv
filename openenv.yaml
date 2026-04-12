@@ -17,22 +17,25 @@ tags:
 
 tasks:
   - id: easy
-    description: "Classify simple, straightforward citizen complaints into priority levels"
+    description: "Classify simple complaints into priority levels"
     difficulty: easy
     max_attempts: 7
-    scoring: "0.0–1.0 partial credit based on priority distance"
+    scoring: "0.0–1.0 partial credit"
+    grader: graders.grade_prediction.grade_prediction
 
   - id: medium
-    description: "Classify moderately complex complaints with multiple factors"
+    description: "Classify moderately complex complaints"
     difficulty: medium
     max_attempts: 7
-    scoring: "0.0–1.0 partial credit based on priority distance"
+    scoring: "0.0–1.0 partial credit"
+    grader: graders.grade_prediction.grade_prediction
 
   - id: hard
-    description: "Classify complex multi-factor complaints requiring contextual understanding"
+    description: "Classify complex multi-factor complaints"
     difficulty: hard
     max_attempts: 12
-    scoring: "0.0–1.0 partial credit based on priority distance"
+    scoring: "0.0–1.0 partial credit"
+    grader: graders.grade_prediction.grade_prediction
 
 observation_space:
   text: "string — the complaint text to classify"
